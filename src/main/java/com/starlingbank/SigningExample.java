@@ -10,7 +10,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,15 +41,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SigningExample {
 
   private static final DateTimeFormatter SIGNATURE_TIMESTAMP_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+  // Sandbox
   private static final String HOSTNAME = "https://payment-api-sandbox.starlingbank.com";
+  private final String privateKeyPath = "PATH_TO_PRIVATE_KEY";
+  private final String publicKeyPath = "PATH_TO_PUBLIC_KEY";
+  private final String apiKeyUid = "YOUR_API_KEY_UID_FROM_SPS_PORTAL";
+  private final String paymentBusinessUid = "YOUR_PAYMENT_BUSINESS_UID_FROM_SPS_PORTAL";
+  private final String accountUid = "ACCOUNT_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
+  private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
+  private final String destinationSortCode = "VALID_SORT_CODE_TO_PAY";
+  private final String destinationAccountNumber = "VALID_ACCOUNT_NUMBER_TO_PAY";
+  private final String destinationAccountName = "Mr Recipient";
+  private final String paymentReference = "The Reference";
+  private final long paymentAmount = 10L;
 
-  private final String privateKeyPath = "/tmp/sandboxApiPrivateKey";
-  private final String publicKeyPath = "/tmp/sandboxApiPublicKey";
-
-  private final String apiKeyUid = "key goes here";
-  private final String paymentBusinessUid = "business uid goes here";
-  private final String accountUid = "output of account creation";
-  private final String addressUid = "output of address creation";
+  // Production
+//  private static final String HOSTNAME = "https://payment-api.starlingbank.com";
+//  private final String privateKeyPath = "PATH_TO_PRIVATE_KEY";
+//  private final String publicKeyPath = "PATH_TO_PUBLIC_KEY";
+//  private final String apiKeyUid = "YOUR_API_KEY_UID_FROM_SPS_PORTAL";
+//  private final String paymentBusinessUid = "YOUR_PAYMENT_BUSINESS_UID_FROM_SPS_PORTAL";
+//  private final String accountUid = "ACCOUNT_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
+//  private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
+//  private final String destinationSortCode = "VALID_SORT_CODE_TO_PAY";
+//  private final String destinationAccountNumber = "VALID_ACCOUNT_NUMBER_TO_PAY";
+//  private final String destinationAccountName = "Mr Recipient";
+//  private final String paymentReference = "The Reference";
+//  private final long paymentAmount = 10L;
 
 
   public void generateKeyForPortal() throws NoSuchAlgorithmException, IOException {
@@ -78,9 +96,14 @@ public class SigningExample {
     String timestamp = SIGNATURE_TIMESTAMP_FORMATTER.format(ZonedDateTime.now());
     String digest = ""; // No payload so no digest needed on a GET
     String httpMethod = "get";
+
+    // Get business
     String resourcePath = "/api/v1/" + paymentBusinessUid;
+    // Get accounts for business
 //    String resourcePath = "/api/v1/" + paymentBusinessUid + "/account/";
+    // Get addresses for acocunts
 //    String resourcePath = "/api/v1/" + paymentBusinessUid + "/account/" + accountUid + "/address";
+
     String textToSign = "(request-target): " + httpMethod + " " + resourcePath + "\nDate: " + timestamp + "\nDigest: " + digest;
 
     // Calculate the authorisation header
@@ -94,9 +117,9 @@ public class SigningExample {
 
     HttpGet get = new HttpGet(new URIBuilder(HOSTNAME + resourcePath)
         .build());
-    get.addHeader("Authorization", authorisationHeader);
-    get.addHeader("Date", timestamp);
-    get.addHeader("Digest", "");
+    get.addHeader(Headers.AUTHORIZATION, authorisationHeader);
+    get.addHeader(Headers.DATE, timestamp);
+    get.addHeader(Headers.DIGEST, "");
 
     HttpResponse response = httpClient.execute(get);
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
@@ -120,17 +143,13 @@ public class SigningExample {
     String authorisationHeader = calculateAuthorisationHeader(privateKey, textToSign);
 
     // Make the HTTP request
-    HttpClient httpClient = HttpClientBuilder.create()
-        .setDefaultHeaders(Arrays.asList(
-            new BasicHeader("Content-Type", "application/json"),
-            new BasicHeader("Accept", "application/json")))
-        .build();
+    HttpClient httpClient = createHttpClient();
 
     HttpPut put = new HttpPut(new URIBuilder(HOSTNAME + resourcePath)
         .build());
-    put.addHeader("Authorization", authorisationHeader);
-    put.addHeader("Date", timestamp);
-    put.addHeader("Digest", digest);
+    put.addHeader(Headers.AUTHORIZATION, authorisationHeader);
+    put.addHeader(Headers.DATE, timestamp);
+    put.addHeader(Headers.DIGEST, digest);
     put.setEntity(new StringEntity(payloadJson));
 
     HttpResponse response = httpClient.execute(put);
@@ -155,17 +174,13 @@ public class SigningExample {
     String authorisationHeader = calculateAuthorisationHeader(privateKey, textToSign);
 
     // Make the HTTP request
-    HttpClient httpClient = HttpClientBuilder.create()
-        .setDefaultHeaders(Arrays.asList(
-            new BasicHeader("Content-Type", "application/json"),
-            new BasicHeader("Accept", "application/json")))
-        .build();
+    HttpClient httpClient = createHttpClient();
 
     HttpPut put = new HttpPut(new URIBuilder(HOSTNAME + resourcePath)
         .build());
-    put.addHeader("Authorization", authorisationHeader);
-    put.addHeader("Date", timestamp);
-    put.addHeader("Digest", digest);
+    put.addHeader(Headers.AUTHORIZATION, authorisationHeader);
+    put.addHeader(Headers.DATE, timestamp);
+    put.addHeader(Headers.DIGEST, digest);
     put.setEntity(new StringEntity(payloadJson));
 
     HttpResponse response = httpClient.execute(put);
@@ -176,7 +191,7 @@ public class SigningExample {
   public void httpPutExamplePayment() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException, URISyntaxException {
     PrivateKey privateKey = loadPrivateKey();
 
-    String payloadJson = "{\"domesticInstructionAccount\": {\"sortCode\":\"608371\", \"accountNumber\": \"56520717\", \"accountName\": \"Sam Everington\"}, \"reference\": \"PSTest\", \"currencyAndAmount\": {\"currency\":\"GBP\", \"minorUnits\":350}, \"type\": \"SIP\"}";
+    String payloadJson = "{\"domesticInstructionAccount\": {\"sortCode\":\""+destinationSortCode+"\", \"accountNumber\": \""+destinationAccountNumber+"\", \"accountName\": \"" + destinationAccountName + "\"}, \"reference\": \"" + paymentReference + "\", \"currencyAndAmount\": {\"currency\":\"GBP\", \"minorUnits\":" + paymentAmount + "}, \"type\": \"SIP\"}";
 
     // Define the resource to be called
     String timestamp = SIGNATURE_TIMESTAMP_FORMATTER.format(ZonedDateTime.now().plusSeconds(4));
@@ -190,22 +205,27 @@ public class SigningExample {
     String authorisationHeader = calculateAuthorisationHeader(privateKey, textToSign);
 
     // Make the HTTP request
-    HttpClient httpClient = HttpClientBuilder.create()
-        .setDefaultHeaders(Arrays.asList(
-            new BasicHeader("Content-Type", "application/json"),
-            new BasicHeader("Accept", "application/json")))
-        .build();
+    HttpClient httpClient = createHttpClient();
 
     HttpPut put = new HttpPut(new URIBuilder(HOSTNAME + resourcePath)
         .build());
-    put.addHeader("Authorization", authorisationHeader);
-    put.addHeader("Date", timestamp);
-    put.addHeader("Digest", digest);
+    put.addHeader(Headers.AUTHORIZATION, authorisationHeader);
+    put.addHeader(Headers.DATE, timestamp);
+    put.addHeader(Headers.DIGEST, digest);
     put.setEntity(new StringEntity(payloadJson));
 
     HttpResponse response = httpClient.execute(put);
     assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
     System.out.println(IOUtils.toString(response.getEntity().getContent(), "utf-8"));
+  }
+
+
+  private HttpClient createHttpClient() {
+    return HttpClientBuilder.create()
+        .setDefaultHeaders(Arrays.asList(
+            new BasicHeader("Content-Type", "application/json"),
+            new BasicHeader("Accept", "application/json")))
+        .build();
   }
 
   private String calculateAuthorisationHeader(PrivateKey privateKey, String textToSign) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
