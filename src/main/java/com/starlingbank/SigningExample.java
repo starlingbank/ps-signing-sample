@@ -48,6 +48,7 @@ public class SigningExample {
   private final String publicKeyPath = "PATH_TO_PUBLIC_KEY";
   private final String apiKeyUid = "YOUR_API_KEY_UID_FROM_SPS_PORTAL";
   private final String paymentBusinessUid = "YOUR_PAYMENT_BUSINESS_UID_FROM_SPS_PORTAL";
+  private final String sortCode = "YOUR_ALLOCATED_SORT_CODE_FROM_SPS_PORTAL";
   private final String accountUid = "ACCOUNT_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
   private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
   private final String destinationSortCode = "VALID_SORT_CODE_TO_PAY";
@@ -62,6 +63,7 @@ public class SigningExample {
 //  private final String publicKeyPath = "PATH_TO_PUBLIC_KEY";
 //  private final String apiKeyUid = "YOUR_API_KEY_UID_FROM_SPS_PORTAL";
 //  private final String paymentBusinessUid = "YOUR_PAYMENT_BUSINESS_UID_FROM_SPS_PORTAL";
+//  private final String sortCode = "YOUR_ALLOCATED_SORT_CODE_FROM_SPS_PORTAL";
 //  private final String accountUid = "ACCOUNT_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
 //  private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
 //  private final String destinationSortCode = "VALID_SORT_CODE_TO_PAY";
@@ -160,7 +162,7 @@ public class SigningExample {
   public void httpPutExampleAddress() throws NoSuchAlgorithmException, InvalidKeySpecException, IOException, InvalidKeyException, SignatureException, URISyntaxException {
     PrivateKey privateKey = loadPrivateKey();
 
-    String payloadJson = "{ \"accountName\":\"First Account\", \"sortCode\":\"040059\"}";
+    String payloadJson = "{ \"accountName\":\"First Account\", \"sortCode\":\"" + sortCode + "\"}";
 
     // Define the resource to be called
     String timestamp = SIGNATURE_TIMESTAMP_FORMATTER.format(ZonedDateTime.now());
@@ -215,8 +217,8 @@ public class SigningExample {
     put.setEntity(new StringEntity(payloadJson));
 
     HttpResponse response = httpClient.execute(put);
-    assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
-    System.out.println(IOUtils.toString(response.getEntity().getContent(), "utf-8"));
+    final String responsePayload = IOUtils.toString(response.getEntity().getContent(), "utf-8");
+    assertThat(response.getStatusLine().getStatusCode()).withFailMessage("Expected 200 but got " + response.getStatusLine().getStatusCode() + " with payload " + responsePayload).isEqualTo(200);
   }
 
 
