@@ -6,7 +6,7 @@ public class Mainline {
     // 1. Set the file paths in the constants of SigningExample class then run this first to create a key pair
     new SigningExample().generateKeyForPortal();
 
-    // 2. Upload the key to the SPS portal then complete the key and business uid constants of SigningExample
+    // 2. Upload the key to the SPS portal then complete the key uid, payment business uid and assigned sort code constants of SigningExample
 
     // 3. Run get for the business to verify key upload / request signing
     // new SigningExample().httpGetExample();
