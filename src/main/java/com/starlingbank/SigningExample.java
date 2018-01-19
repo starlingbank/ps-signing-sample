@@ -50,7 +50,7 @@ public class SigningExample {
   private final String paymentBusinessUid = "YOUR_PAYMENT_BUSINESS_UID_FROM_SPS_PORTAL";
   private final String sortCode = "YOUR_ALLOCATED_SORT_CODE_FROM_SPS_PORTAL";
   private final String accountUid = "ACCOUNT_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
-  private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ACCOUNT_HAS_BEEN_EXECUTED";
+  private final String addressUid = "ADDRESS_UID_ONCE_CREATE_ADDRESS_HAS_BEEN_EXECUTED";
   private final String destinationSortCode = "VALID_SORT_CODE_TO_PAY";
   private final String destinationAccountNumber = "VALID_ACCOUNT_NUMBER_TO_PAY";
   private final String destinationAccountName = "Mr Recipient";
