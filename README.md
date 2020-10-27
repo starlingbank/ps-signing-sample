@@ -1,14 +1,3 @@
 # Starling Payment APIs
 
-## Request Signing Sample Code
-
-This project provides sample Java code to generate valid signatures for authorising requests to the Starling Bank payment APIs. You can execute the code by running the `Mainline` class, uncommenting respective lines according to the numbered instructions.
-
-The samples take you through the process of:
-- Generating a key pair to upload to the portal
-- Validating the uploaded key by reading payment business information
-- Creating an account to hold funds for instructing payments
-- Creating an address for the account to send payments from
-- Sending an outbound payment from the address
- 
-
+This repository has moved to [api-samples](https://github.com/starlingbank/api-samples/tree/master/message-signing/java/ps-signing)
